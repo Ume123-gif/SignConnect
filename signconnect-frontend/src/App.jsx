@@ -9,6 +9,8 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState("ready");
   const [errorMessage, setErrorMessage] = useState(null);
+  const [isListening, setIsListening] = useState(false);
+  const [staffText, setStaffText] = useState("");
 
   useEffect(() => {
     let stream;
@@ -49,6 +51,36 @@ function App() {
     const utterance = new SpeechSynthesisUtterance(word);
     utterance.rate = 0.9;
     window.speechSynthesis.speak(utterance);
+  }
+
+  function startListening() {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    if (!SpeechRecognition) {
+      alert("Speech recognition not supported in this browser. Try Chrome.");
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = "en-IN";
+    recognition.continuous = false;
+    recognition.interimResults = false;
+
+    recognition.onstart = () => setIsListening(true);
+
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      setStaffText(transcript);
+    };
+
+    recognition.onerror = (event) => {
+      console.error("Speech recognition error:", event.error);
+      setIsListening(false);
+    };
+
+    recognition.onend = () => setIsListening(false);
+
+    recognition.start();
   }
 
   function canvasToBlob(canvas) {
@@ -225,7 +257,7 @@ function App() {
             Detecting Sign...
           </span>
         ) : (
-          "Capture Sign"
+          "🖐️ Capture Sign"
         )}
       </button>
 
@@ -253,6 +285,24 @@ function App() {
           </button>
         </div>
       )}
+
+      <div className="w-full max-w-md bg-gray-800 rounded-xl p-6 text-center mt-4">
+        <p className="text-sm text-gray-400 mb-3">Staff Reply (Speech → Text)</p>
+
+        <button
+          onClick={startListening}
+          disabled={isListening}
+          className="bg-purple-600 hover:bg-purple-700 disabled:bg-gray-600 px-6 py-3 rounded-lg font-semibold transition-all"
+        >
+          {isListening ? "Listening..." : "🎤 Speak Reply"}
+        </button>
+
+        {staffText && (
+          <div className="mt-4 bg-gray-900 rounded-lg p-4">
+            <p className="text-2xl font-semibold">{staffText}</p>
+          </div>
+        )}
+      </div>
 
       {errorMessage && (
         <div className="bg-red-900/40 border border-red-700 rounded-xl p-6 text-center w-full max-w-md">
