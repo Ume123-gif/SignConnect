@@ -1,10 +1,9 @@
 # SignConnect — Real-Time ISL Interpreter for Government Service Counters
 
-**Smart India Hackathon 2026 · Team NexSign · Theme: Smart Automation**
-
 SignConnect is a two-way communication system for government service counters. A citizen signs, the camera reads the gesture and shows staff what was said in text (and speech). Staff replies out loud, and the citizen sees a simplified text reply. It's built for a fixed, high-frequency counter vocabulary — not open ISL translation — so it can actually be trained and deployed on a hackathon timeline.
 
-**Live demo:** https://sign-connect-virid.vercel.app
+**Live demo:** https://sign-connect-virid.vercel.app 
+
 **Backend:** https://signconnect-backend.onrender.com
 
 ---
