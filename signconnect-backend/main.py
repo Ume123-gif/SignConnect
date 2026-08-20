@@ -48,9 +48,13 @@ def extract_landmarks(image):
 
     return left_hand + right_hand
 
-@app.get("/")
-def home():
-    return {"message": "SignConnect API is running"}
+SUPPORTED_SIGNS = ["hello", "yes", "no", "thankyou", "wait", "welcome"]
+
+@app.get("/signs")
+def get_supported_signs():
+    return {"signs": SUPPORTED_SIGNS, "count": len(SUPPORTED_SIGNS)}
+
+CONFIDENCE_THRESHOLD = 0.6
 
 @app.post("/predict")
 async def predict_sign(file: UploadFile = File(...)):
@@ -65,12 +69,16 @@ async def predict_sign(file: UploadFile = File(...)):
         return {"prediction": None, "message": "No hand detected"}
 
     features_array = np.array(features).reshape(1, -1)
-
     prediction = model.predict(features_array)[0]
     confidence = model.predict_proba(features_array).max()
 
+    if confidence < CONFIDENCE_THRESHOLD:
+        return {
+            "prediction": prediction,
+            "confidence": round(float(confidence), 2)
+        }
     return {
         "prediction": prediction,
-        "confidence": round(float(confidence), 2)
+        "confidence": round(confidence, 2),
     }
     

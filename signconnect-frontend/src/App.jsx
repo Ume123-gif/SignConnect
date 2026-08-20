@@ -107,6 +107,8 @@ function App() {
     setPrediction(null);
     setConfidence(null);
 
+    let lastMessage = "No hand detected"
+
     try {
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
@@ -155,6 +157,8 @@ function App() {
             prediction: data.prediction,
             confidence: data.confidence,
           });
+        } else if (data.message) {
+          lastMessage = data.message;
         }
 
         await new Promise((resolve) =>
@@ -165,7 +169,7 @@ function App() {
       if (predictions.length === 0) {
         setPrediction(null);
         setConfidence(null);
-        setErrorMessage("No hand detected");
+        setErrorMessage(lastMessage);
         setStatus("ready");
         return;
       }
