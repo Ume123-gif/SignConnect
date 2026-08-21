@@ -220,109 +220,117 @@ function App() {
     }
   }
 
-  return (
-    <div className="min-h-screen bg-gray-900 text-white flex flex-col items-center justify-center gap-6 p-6">
-      <h1 className="text-3xl font-bold">
-        SignConnect
-      </h1>
-
-      <div className="relative w-full max-w-2xl">
-        <video
-          ref={videoRef}
-          autoPlay
-          playsInline
-          muted
-          className="w-full aspect-video object-cover rounded-2xl border-2 border-gray-700"
-        />
-
-        <div className="absolute top-4 left-4 bg-black/60 px-3 py-1 rounded-full text-sm">
-          <span className="text-green-400">●</span>{" "}
-          Camera Ready
-        </div>
-
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/60 px-4 py-2 rounded-lg text-sm">
-          Place your hand clearly inside the frame
-        </div>
+return (
+  <div className="min-h-screen bg-[#0B1F33] text-white flex flex-col items-center px-4 py-8 gap-6">
+    {/* Header */}
+    <header className="w-full max-w-2xl flex items-center justify-between">
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight">SignConnect</h1>
+        <p className="text-xs text-[#8FAFC0]">Real-time ISL interpreter</p>
       </div>
+    </header>
 
-      <canvas
-        ref={canvasRef}
-        className="hidden"
+    {/* Camera */}
+    <div className="relative w-full max-w-2xl">
+      <video
+        ref={videoRef}
+        autoPlay
+        playsInline
+        muted
+        className="w-full aspect-video object-cover rounded-xl border border-[#1C4368]"
       />
+      <div className="absolute top-3 left-3 flex items-center gap-1.5 bg-black/50 backdrop-blur px-2.5 py-1 rounded-full text-xs">
+        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+        Camera ready
+      </div>
+      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-black/50 backdrop-blur px-3 py-1.5 rounded-lg text-xs text-[#E7EEF3]">
+        Place your hand clearly inside the frame
+      </div>
+    </div>
 
-      <button
-        onClick={captureAndPredict}
-        disabled={loading}
-        className="w-full max-w-2xl bg-blue-600 hover:bg-blue-700 active:scale-95 disabled:bg-gray-600 disabled:cursor-not-allowed px-6 py-4 rounded-xl font-semibold text-lg transition-all duration-150 shadow-lg"
-      >
-        {loading ? (
-          <span className="flex items-center justify-center gap-3">
-            <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-            Detecting Sign...
-          </span>
-        ) : (
-          "🖐️ Capture Sign"
-        )}
-      </button>
+    <canvas ref={canvasRef} className="hidden" />
 
-      {prediction !== null && (
-        <div className="bg-gray-800 rounded-xl p-6 text-center w-full max-w-md animate-in fade-in duration-300">
-          <p className="text-sm text-gray-400">
-            Detected Sign
-          </p>
-
-          <p className="text-4xl font-bold capitalize">
-            {prediction}
-          </p>
-
-          {confidence !== null && (
-            <p className="text-sm text-gray-400 mt-2">
-              Confidence: {(confidence * 100).toFixed(0)}%
-            </p>
-          )}
-
-          <button
-            onClick={() => speakPrediction(prediction)}
-            className="mt-3 text-sm text-blue-400 hover:text-blue-300 underline"
-          >
-            🔊 Replay
-          </button>
-        </div>
+    {/* Capture button */}
+    <button
+      onClick={captureAndPredict}
+      disabled={loading}
+      className="w-full max-w-2xl bg-[#E8871E] hover:bg-[#D67A15] active:scale-[0.98] disabled:bg-[#3E4C58] disabled:cursor-not-allowed px-6 py-4 rounded-lg font-semibold text-[#0B1F33] disabled:text-white transition-all flex items-center justify-center gap-2"
+    >
+      {loading ? (
+        <>
+          <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+          Detecting sign…
+        </>
+      ) : (
+        <>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M12 2v20M2 12h20" strokeLinecap="round" />
+          </svg>
+          Capture sign
+        </>
       )}
+    </button>
 
-      <div className="w-full max-w-md bg-gray-800 rounded-xl p-6 text-center mt-4">
-        <p className="text-sm text-gray-400 mb-3">Staff Reply (Speech → Text)</p>
+    {/* Prediction result */}
+    {prediction !== null && (
+      <div className="bg-[#132C47] border border-[#1C4368] rounded-xl p-5 w-full max-w-md">
+        <p className="text-xs uppercase tracking-wide text-[#8FAFC0]">Detected sign</p>
+        <p className="text-3xl font-bold capitalize mt-1">{prediction}</p>
 
-        <button
-          onClick={startListening}
-          disabled={isListening}
-          className="bg-purple-600 hover:bg-purple-700 disabled:bg-gray-600 px-6 py-3 rounded-lg font-semibold transition-all"
-        >
-          {isListening ? "Listening..." : "🎤 Speak Reply"}
-        </button>
-
-        {staffText && (
-          <div className="mt-4 bg-gray-900 rounded-lg p-4">
-            <p className="text-2xl font-semibold">{staffText}</p>
+        {confidence !== null && (
+          <div className="mt-3">
+            <div className="flex justify-between text-xs text-[#8FAFC0] mb-1">
+              <span>Confidence</span>
+              <span>{(confidence * 100).toFixed(0)}%</span>
+            </div>
+            <div className="w-full h-1.5 bg-[#0B1F33] rounded-full overflow-hidden">
+              <div
+                className="h-full bg-[#E8871E] rounded-full transition-all"
+                style={{ width: `${confidence * 100}%` }}
+              />
+            </div>
           </div>
         )}
+
+        <button
+          onClick={() => speakPrediction(prediction)}
+          className="mt-4 text-sm text-[#E8871E] hover:text-[#F0A04B] font-medium"
+        >
+          Replay audio
+        </button>
       </div>
+    )}
 
-      {errorMessage && (
-        <div className="bg-red-900/40 border border-red-700 rounded-xl p-6 text-center w-full max-w-md">
-          <p className="text-lg font-semibold">
-            {status === "error"
-              ? "Something went wrong"
-              : "No hand detected"}
-          </p>
+    {/* Staff reply */}
+    <div className="w-full max-w-md bg-[#132C47] border border-[#1C4368] rounded-xl p-5 text-center">
+      <p className="text-xs uppercase tracking-wide text-[#8FAFC0] mb-3">Staff reply</p>
+      <button
+        onClick={startListening}
+        disabled={isListening}
+        className="bg-[#1C4368] hover:bg-[#245079] disabled:bg-[#3E4C58] px-6 py-3 rounded-lg font-semibold transition-all inline-flex items-center gap-2"
+      >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+          <rect x="9" y="2" width="6" height="12" rx="3" />
+          <path d="M5 10a7 7 0 0 0 14 0M12 19v3" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" />
+        </svg>
+        {isListening ? "Listening…" : "Speak reply"}
+      </button>
 
-          <p className="text-sm text-gray-400 mt-1">
-            {errorMessage}
-          </p>
+      {staffText && (
+        <div className="mt-4 bg-[#0B1F33] rounded-lg p-4">
+          <p className="text-xl font-semibold">{staffText}</p>
         </div>
       )}
     </div>
-  );
+
+    {errorMessage && (
+      <div className="bg-[#3D1F1F] border border-[#6B2E2E] rounded-xl p-5 text-center w-full max-w-md">
+        <p className="font-semibold">{status === "error" ? "Something went wrong" : "No hand detected"}</p>
+        <p className="text-sm text-[#B79C9C] mt-1">{errorMessage}</p>
+      </div>
+    )}
+  </div>
+);
 }
 
 export default App;
