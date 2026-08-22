@@ -11,6 +11,31 @@ function App() {
   const [errorMessage, setErrorMessage] = useState(null);
   const [isListening, setIsListening] = useState(false);
   const [staffText, setStaffText] = useState("");
+  const [signVideos, setSignVideos] = useState([]);
+  const [currentSign, setCurrentSign] = useState(0);
+
+  const signMappings = {
+  "thank you": ["/signs/thankyou.mp4"],
+  "please wait": ["/signs/please.mp4", "/signs/wait.mp4"],
+  "please": ["/signs/please.mp4"],
+  "wait": ["/signs/wait.mp4"],
+  "welcome": ["/signs/welcome.mp4"],
+  };
+
+  function showSign() {
+    const text = staffText
+      .trim()
+      .toLowerCase()
+      .replace(/[.,!?]/g, "");
+
+    if (signMappings[text]) {
+      setSignVideos(signMappings[text]);
+      setCurrentSign(0);
+    } else {
+      setSignVideos([]);
+      alert("This phrase is not available in the current ISL vocabulary.");
+    }
+  }
 
   useEffect(() => {
     let stream;
@@ -221,114 +246,273 @@ function App() {
   }
 
 return (
-  <div className="min-h-screen bg-[#0B1F33] text-white flex flex-col items-center px-4 py-8 gap-6">
+  <div className="min-h-screen bg-[#0B1F33] text-white flex flex-col items-center px-6 py-6 gap-5">
+
     {/* Header */}
-    <header className="w-full max-w-2xl flex items-center justify-between">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">SignConnect</h1>
-        <p className="text-xs text-[#8FAFC0]">Real-time ISL interpreter</p>
-      </div>
+    <header className="w-full max-w-6xl text-center">
+      <h1 className="text-3xl font-bold tracking-tight">
+        SignConnect
+      </h1>
+
+      <p className="text-sm text-[#8FAFC0] mt-1">
+        Real-time two-way ISL communication
+      </p>
     </header>
 
-    {/* Camera */}
-    <div className="relative w-full max-w-2xl">
-      <video
-        ref={videoRef}
-        autoPlay
-        playsInline
-        muted
-        className="w-full aspect-video object-cover rounded-xl border border-[#1C4368]"
-      />
-      <div className="absolute top-3 left-3 flex items-center gap-1.5 bg-black/50 backdrop-blur px-2.5 py-1 rounded-full text-xs">
-        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-        Camera ready
-      </div>
-      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-black/50 backdrop-blur px-3 py-1.5 rounded-lg text-xs text-[#E7EEF3]">
-        Place your hand clearly inside the frame
-      </div>
-    </div>
+    {/* TWO-WAY COMMUNICATION */}
+    <div className="w-full max-w-6xl grid grid-cols-2 gap-5">
 
-    <canvas ref={canvasRef} className="hidden" />
+      {/* ================= LEFT: CITIZEN → STAFF ================= */}
+      <div className="bg-[#132C47] border border-[#1C4368] rounded-2xl p-5">
 
-    {/* Capture button */}
-    <button
-      onClick={captureAndPredict}
-      disabled={loading}
-      className="w-full max-w-2xl bg-[#E8871E] hover:bg-[#D67A15] active:scale-[0.98] disabled:bg-[#3E4C58] disabled:cursor-not-allowed px-6 py-4 rounded-lg font-semibold text-[#0B1F33] disabled:text-white transition-all flex items-center justify-center gap-2"
-    >
-      {loading ? (
-        <>
-          <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-          Detecting sign…
-        </>
-      ) : (
-        <>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M12 2v20M2 12h20" strokeLinecap="round" />
-          </svg>
-          Capture sign
-        </>
-      )}
-    </button>
+        <div className="text-center mb-4">
+          <p className="text-xs uppercase tracking-widest text-[#E8871E] font-semibold">
+            Citizen → Staff
+          </p>
 
-    {/* Prediction result */}
-    {prediction !== null && (
-      <div className="bg-[#132C47] border border-[#1C4368] rounded-xl p-5 w-full max-w-md">
-        <p className="text-xs uppercase tracking-wide text-[#8FAFC0]">Detected sign</p>
-        <p className="text-3xl font-bold capitalize mt-1">{prediction}</p>
+          <p className="text-sm text-[#8FAFC0] mt-1">
+            Sign language recognition
+          </p>
+        </div>
 
-        {confidence !== null && (
-          <div className="mt-3">
-            <div className="flex justify-between text-xs text-[#8FAFC0] mb-1">
-              <span>Confidence</span>
-              <span>{(confidence * 100).toFixed(0)}%</span>
-            </div>
-            <div className="w-full h-1.5 bg-[#0B1F33] rounded-full overflow-hidden">
-              <div
-                className="h-full bg-[#E8871E] rounded-full transition-all"
-                style={{ width: `${confidence * 100}%` }}
-              />
-            </div>
+        {/* Camera */}
+        <div className="relative w-full">
+
+          <video
+            ref={videoRef}
+            autoPlay
+            playsInline
+            muted
+            className="w-full aspect-video object-cover rounded-xl border border-[#1C4368]"
+          />
+
+          <div className="absolute top-3 left-3 flex items-center gap-1.5 bg-black/50 backdrop-blur px-2.5 py-1 rounded-full text-xs">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            Camera ready
+          </div>
+
+          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-black/50 backdrop-blur px-3 py-1.5 rounded-lg text-xs text-[#E7EEF3]">
+            Place your hand clearly inside the frame
+          </div>
+
+        </div>
+
+
+        <canvas ref={canvasRef} className="hidden" />
+
+        {/* Capture button */}
+        <button
+          onClick={captureAndPredict}
+          disabled={loading}
+          className="w-full mt-4 bg-[#E8871E] hover:bg-[#D67A15] active:scale-[0.98] disabled:bg-[#3E4C58] disabled:cursor-not-allowed px-6 py-3.5 rounded-lg font-semibold text-[#0B1F33] disabled:text-white transition-all flex items-center justify-center gap-2"
+        >
+
+          {loading ? (
+            <>
+              <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              Detecting sign…
+            </>
+          ) : (
+            <>
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <path
+                  d="M12 2v20M2 12h20"
+                  strokeLinecap="round"
+                />
+              </svg>
+
+              Capture sign
+            </>
+          )}
+
+        </button>
+
+        {/* Prediction */}
+        {prediction !== null && (
+          <div className="bg-[#0B1F33] border border-[#1C4368] rounded-xl p-5 mt-4">
+
+            <p className="text-xs uppercase tracking-wide text-[#8FAFC0]">
+              Detected sign
+            </p>
+
+            <p className="text-3xl font-bold capitalize mt-1">
+              {prediction}
+            </p>
+
+            {confidence !== null && (
+              <div className="mt-3">
+
+                <div className="flex justify-between text-xs text-[#8FAFC0] mb-1">
+                  <span>Confidence</span>
+                  <span>{(confidence * 100).toFixed(0)}%</span>
+                </div>
+
+                <div className="w-full h-1.5 bg-[#132C47] rounded-full overflow-hidden">
+
+                  <div
+                    className="h-full bg-[#E8871E] rounded-full transition-all"
+                    style={{
+                      width: `${confidence * 100}%`
+                    }}
+                  />
+
+                </div>
+
+              </div>
+            )}
+
+
+            <button
+              onClick={() => speakPrediction(prediction)}
+              className="mt-4 text-sm text-[#E8871E] hover:text-[#F0A04B] font-medium"
+            >
+              🔊 Replay audio
+            </button>
+
           </div>
         )}
 
-        <button
-          onClick={() => speakPrediction(prediction)}
-          className="mt-4 text-sm text-[#E8871E] hover:text-[#F0A04B] font-medium"
-        >
-          Replay audio
-        </button>
       </div>
-    )}
 
-    {/* Staff reply */}
-    <div className="w-full max-w-md bg-[#132C47] border border-[#1C4368] rounded-xl p-5 text-center">
-      <p className="text-xs uppercase tracking-wide text-[#8FAFC0] mb-3">Staff reply</p>
-      <button
-        onClick={startListening}
-        disabled={isListening}
-        className="bg-[#1C4368] hover:bg-[#245079] disabled:bg-[#3E4C58] px-6 py-3 rounded-lg font-semibold transition-all inline-flex items-center gap-2"
-      >
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-          <rect x="9" y="2" width="6" height="12" rx="3" />
-          <path d="M5 10a7 7 0 0 0 14 0M12 19v3" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" />
-        </svg>
-        {isListening ? "Listening…" : "Speak reply"}
-      </button>
+      {/* ================= RIGHT: STAFF → CITIZEN ================= */}
+      <div className="bg-[#132C47] border border-[#1C4368] rounded-2xl p-5">
 
-      {staffText && (
-        <div className="mt-4 bg-[#0B1F33] rounded-lg p-4">
-          <p className="text-xl font-semibold">{staffText}</p>
+        <div className="text-center mb-4">
+
+          <p className="text-xs uppercase tracking-widest text-[#E8871E] font-semibold">
+            Staff → Citizen
+          </p>
+
+          <p className="text-sm text-[#8FAFC0] mt-1">
+            Text to ISL communication
+          </p>
+
         </div>
-      )}
+
+        {/* Voice input */}
+        <button
+          onClick={startListening}
+          disabled={isListening}
+          className="w-full bg-[#1C4368] hover:bg-[#245079] disabled:bg-[#3E4C58] px-6 py-3 rounded-lg font-semibold transition-all flex items-center justify-center gap-2"
+        >
+
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+          >
+            <rect
+              x="9"
+              y="2"
+              width="6"
+              height="12"
+              rx="3"
+            />
+
+            <path
+              d="M5 10a7 7 0 0 0 14 0M12 19v3"
+              stroke="currentColor"
+              strokeWidth="2"
+              fill="none"
+              strokeLinecap="round"
+            />
+
+          </svg>
+
+          {isListening ? "Listening…" : "Speak reply"}
+
+        </button>
+
+        {/* Text input */}
+        <input
+          type="text"
+          value={staffText}
+          onChange={(e) => setStaffText(e.target.value)}
+          placeholder="Type a response..."
+          className="w-full mt-4 px-4 py-3 rounded-lg bg-[#0B1F33] border border-[#1C4368] text-white placeholder-[#8FAFC0] outline-none focus:border-[#E8871E]"
+        />
+
+        {/* Staff response */}
+        {staffText && (
+          <div className="mt-4 bg-[#0B1F33] rounded-lg p-4">
+
+            <p className="text-xs text-[#8FAFC0] mb-1">
+              Staff response
+            </p>
+
+            <p className="text-xl font-semibold">
+              {staffText}
+            </p>
+
+          </div>
+        )}
+
+        {/* Show in ISL */}
+        {staffText && (
+          <button
+            onClick={showSign}
+            className="mt-4 w-full bg-[#E8871E] hover:bg-[#D67A15] px-5 py-3 rounded-lg font-semibold text-[#0B1F33] transition-all"
+          >
+            Show in ISL
+          </button>
+        )}
+
+        {/* ISL Video */}
+        {signVideos.length > 0 && (
+          <div className="mt-5">
+
+            <p className="text-xs uppercase tracking-wide text-[#8FAFC0] mb-2">
+              ISL Representation
+            </p>
+
+            <video
+              key={signVideos[currentSign]}
+              src={signVideos[currentSign]}
+              autoPlay
+              playsInline
+              controls
+              onEnded={() => {
+                if (currentSign < signVideos.length - 1) {
+                  setCurrentSign(currentSign + 1);
+                }
+              }}
+              className="w-full rounded-xl border border-[#1C4368] aspect-video object-contain bg-black"
+            />
+
+            <p className="text-xs text-[#8FAFC0] mt-2 text-center">
+              Sign {currentSign + 1} of {signVideos.length}
+            </p>
+
+          </div>
+        )}
+
+      </div>
+
     </div>
 
+    {/* Error message */}
     {errorMessage && (
-      <div className="bg-[#3D1F1F] border border-[#6B2E2E] rounded-xl p-5 text-center w-full max-w-md">
-        <p className="font-semibold">{status === "error" ? "Something went wrong" : "No hand detected"}</p>
-        <p className="text-sm text-[#B79C9C] mt-1">{errorMessage}</p>
+      <div className="bg-[#3D1F1F] border border-[#6B2E2E] rounded-xl p-4 text-center w-full max-w-6xl">
+
+        <p className="font-semibold">
+          Something went wrong
+        </p>
+
+        <p className="text-sm text-[#B79C9C] mt-1">
+          {errorMessage}
+        </p>
+
       </div>
     )}
+
   </div>
 );
 }
